@@ -1,0 +1,18 @@
+node_modules
+npm-debug.log
+.env
+.DS_Store
+/build
+/dist
+out
+/cargo
+/target
+
+# Exclude Rust temporary files
+*.rs.bk
+*.rs.swap
+
+# Ignore local project configurations
+.idea
+.vscode
+*.iml
