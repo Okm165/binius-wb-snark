@@ -1,101 +1,136 @@
-import Image from "next/image";
+"use client"
+
+import { useRef, useState } from "react";
+import { WorkerMessage, WorkerResponse } from "@/worker";
+import { Box, Button, Typography } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const workerRef = useRef<Worker>(null);
+  const [time, setTime] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [inputs, setInputs] = useState<string[]>(Array(25).fill(""));
+  const [hashes, setHashes] = useState<string[]>(Array(25).fill(""));
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const generateRandomInputs = () => {
+    const randomIntegers = Array.from({ length: 25 }, () =>
+      Math.floor(Math.random() * 1000000000).toString()
+    );
+    setTime(null);
+    setInputs(randomIntegers);
+    setHashes(Array(25).fill(""));
+  };
+
+  const biniusProveAndVerifyKeccakTrace = async () => {
+    setIsLoading(true);
+
+    workerRef.current = new Worker(new URL("../worker.ts", import.meta.url), {
+      type: "module",
+    });
+
+    const startTime = Date.now();
+
+    workerRef.current.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      const { values, error } = event.data;
+
+      if (error) {
+        console.error(error);
+      } else if (values) {
+        setHashes(values);
+      }
+
+      const endTime = Date.now();
+      const elapsedTime = endTime - startTime;
+      setTime(elapsedTime);
+
+      workerRef.current?.terminate();
+
+      setIsLoading(false)
+    };
+
+    const message: WorkerMessage = {
+      values: inputs,
+    };
+
+    workerRef.current.postMessage(message);
+  };
+
+  return (
+    <div className="grid gap-6 p-4">
+      <h1 className="text-2xl font-bold text-center text-gray-300">
+        Binius Keccak256 - Prove and Verify - SNARK demo
+      </h1>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-1 text-xs">
+        {inputs.map((value, index) => (
+          <input
+            key={index}
+            type="text"
+            value={value}
+            onChange={(e) => {
+              const newInputs = [...inputs];
+              newInputs[index] = e.target.value;
+              setInputs(newInputs);
+            }}
+            className="p-0 bg-gray-900 text-xs"
+          />
+        ))}
+      </div>
+      <div className="grid grid-flow-row justify-center gap-4">
+        <Button
+          sx={{
+            height: 50,
+          }}
+          variant="outlined"
+          size="small"
+          onClick={async () => {
+            generateRandomInputs();
+          }}
+        >
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <Typography variant="body2">generate random inputs</Typography>
+          </Box>
+        </Button>
+        <Button
+          sx={{
+            color: "#F2A900",
+            borderColor: "#473200",
+            height: 50,
+            "&:hover": {
+              borderColor: "#634500",
+            },
+          }}
+          variant="outlined"
+          size="small"
+          disabled={isLoading}
+          onClick={async () => {
+            biniusProveAndVerifyKeccakTrace();
+          }}
+        >
+          {isLoading ? (
+            <CircularProgress
+              size={24}
+              sx={{ color: "#F2A900", animationDuration: "700ms" }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          ) : (
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <Typography variant="body2">keccak prove verify</Typography>
+            </Box>
+          )}
+        </Button>
+      </div>
+      <div className="grid justify-center gap-1 text-xs">
+        {time !== null ? `Time: ${time} seconds` : null}
+      </div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-1 text-xs">
+        {hashes.map((hash, index) => (
+          <div
+            key={index}
+            className="p-0 bg-gray-900 text-xs"
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            {hash}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
