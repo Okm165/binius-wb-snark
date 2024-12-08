@@ -119,7 +119,7 @@ export default function Home() {
         </Button>
       </div>
       <div className="grid justify-center gap-1 text-xs">
-        {time !== null ? `Time: ${time} seconds` : null}
+        {time !== null ? `Time: ${time/1000} seconds` : null}
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-1 text-xs">
         {hashes.map((hash, index) => (
