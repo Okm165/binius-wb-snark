@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: binius-keccak-cert
+  namespace: binius-keccak
+spec:
+  secretName: binius-keccak-tls
+
+  dnsNames:
+    - keccak.binius.iosis.tech
+  issuerRef:
+    name: letsencrypt-http01
+    kind: Issuer

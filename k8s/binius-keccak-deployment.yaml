@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: binius-keccak
+  namespace: binius-keccak
+spec:
+  selector:
+    matchLabels:
+      app: binius-keccak
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: binius-keccak
+    spec:
+      containers:
+      - name: binius-keccak
+        image: registry.internal.iosis.tech/binius-keccak
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: binius-keccak-service
+  namespace: binius-keccak
+spec:
+  selector:
+    app: binius-keccak
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: binius-keccak-ingress
+  namespace: binius-keccak
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+spec:
+  ingressClassName: nginx-ingress-prod
+  tls:
+  - hosts:
+    - keccak.binius.iosis.tech
+    secretName: binius-keccak-tls
+  rules:
+  - host: keccak.binius.iosis.tech
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: binius-keccak-service
+            port:
+              number: 80

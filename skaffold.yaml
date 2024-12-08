@@ -1,0 +1,13 @@
+apiVersion: skaffold/v4beta3
+kind: Config
+build:
+  artifacts:
+    - image: registry.internal.iosis.tech/binius-keccak
+      context: .
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - ./k8s/binius-keccak-deployment.yaml
+    - ./k8s/certificates.yaml
+    - ./k8s/issuer.yaml
