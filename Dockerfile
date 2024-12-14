@@ -17,7 +17,7 @@ COPY . .
 RUN cd backend/out && npm link
 
 # Link the Rust-built package
-RUN npm link binius-keccak
+RUN npm link binius-web-snark
 
 # Build the Next.js application
 RUN npm run build

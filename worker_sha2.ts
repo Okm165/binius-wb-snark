@@ -1,4 +1,4 @@
-import init, { run_sha2 } from "binius-keccak";
+import init, { run_sha2 } from "binius-web-snark";
 
 export interface WorkerMessage {
     value: string;
