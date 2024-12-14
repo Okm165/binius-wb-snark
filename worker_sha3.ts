@@ -1,23 +1,23 @@
-import init, { run as biniusProveAndVerifyKeccakTrace } from "binius-keccak";
+import init, { run_sha3 } from "binius-keccak";
 
 export interface WorkerMessage {
-    values: string[];
+    value: string;
 }
 
 export interface WorkerResponse {
-    values?: string[];
+    value?: string;
     error?: string;
 }
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
-    const { values } = event.data;
+    const { value } = event.data;
 
     try {
         await init();
-        let hash = await biniusProveAndVerifyKeccakTrace(values);
+        const hash = await run_sha3(value);
 
         // Send results back to the main thread
-        const response: WorkerResponse = { values: hash };
+        const response: WorkerResponse = { value: hash };
         self.postMessage(response);
     } catch (error) {
         // Send error back to the main thread

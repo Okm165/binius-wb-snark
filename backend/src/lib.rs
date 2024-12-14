@@ -5,6 +5,7 @@ use binius_hal::make_portable_backend;
 use binius_hash::{GroestlDigestCompression, GroestlHasher};
 use binius_math::DefaultEvaluationDomainFactory;
 use groestl_crypto::Groestl256;
+use std::convert::TryInto;
 use utils::set_panic_hook;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
@@ -25,11 +26,26 @@ pub fn run_sha2(input_values: JsValue) -> Result<JsValue, JsValue> {
     let mut builder =
         ConstraintSystemBuilder::<OptimalUnderlier, BinaryField128b>::new_with_witness(&allocator);
 
-    let input: Vec<u8> = input_values
+    let input: Vec<u64> = input_values
         .as_string()
         .ok_or_else(|| JsValue::from("Input must be a valid hex string"))
         .and_then(|f| {
-            hex::decode(f).map_err(|e| JsValue::from(format!("Failed to decode hex input: {e}")))
+            Ok(hex::decode(f)
+                .map_err(|e| JsValue::from(format!("Failed to decode hex input: {e}")))?
+                .chunks(8)
+                .map(|chunk| {
+                    u64::from_le_bytes(
+                        chunk
+                            .iter()
+                            .cloned()
+                            .chain(std::iter::repeat(0))
+                            .take(8)
+                            .collect::<Vec<u8>>()
+                            .try_into()
+                            .unwrap(),
+                    )
+                })
+                .collect())
         })?;
 
     let output: Vec<u8> = sha2::trace_gen::<_, _, BinaryField1b>(&mut builder, input, LOG_SIZE)
@@ -98,11 +114,26 @@ pub fn run_sha3(input_values: JsValue) -> Result<JsValue, JsValue> {
     let mut builder =
         ConstraintSystemBuilder::<OptimalUnderlier, BinaryField128b>::new_with_witness(&allocator);
 
-    let input: Vec<u8> = input_values
+    let input: Vec<u64> = input_values
         .as_string()
         .ok_or_else(|| JsValue::from("Input must be a valid hex string"))
         .and_then(|f| {
-            hex::decode(f).map_err(|e| JsValue::from(format!("Failed to decode hex input: {e}")))
+            Ok(hex::decode(f)
+                .map_err(|e| JsValue::from(format!("Failed to decode hex input: {e}")))?
+                .chunks(8)
+                .map(|chunk| {
+                    u64::from_le_bytes(
+                        chunk
+                            .iter()
+                            .cloned()
+                            .chain(std::iter::repeat(0))
+                            .take(8)
+                            .collect::<Vec<u8>>()
+                            .try_into()
+                            .unwrap(),
+                    )
+                })
+                .collect())
         })?;
 
     let output: Vec<u8> = sha3::trace_gen::<_, _, BinaryField1b>(&mut builder, input, LOG_SIZE)

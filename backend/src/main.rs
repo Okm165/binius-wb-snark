@@ -6,6 +6,7 @@ use binius_hal::make_portable_backend;
 use binius_hash::{GroestlDigestCompression, GroestlHasher};
 use binius_math::DefaultEvaluationDomainFactory;
 use groestl_crypto::Groestl256;
+use std::convert::TryInto;
 
 pub mod sha2;
 pub mod sha3;
@@ -20,7 +21,21 @@ pub fn main() -> anyhow::Result<()> {
     let mut builder =
         ConstraintSystemBuilder::<OptimalUnderlier, BinaryField128b>::new_with_witness(&allocator);
 
-    let input: Vec<u8> = hex::decode("aaccaa").unwrap();
+    let input: Vec<u64> = hex::decode("aaccaa")?
+        .chunks(8)
+        .map(|chunk| {
+            u64::from_le_bytes(
+                chunk
+                    .iter()
+                    .cloned()
+                    .chain(std::iter::repeat(0))
+                    .take(8)
+                    .collect::<Vec<u8>>()
+                    .try_into()
+                    .unwrap(),
+            )
+        })
+        .collect();
 
     let output: Vec<u8> = sha2::trace_gen::<_, _, BinaryField1b>(&mut builder, input, log_size)
         .unwrap()

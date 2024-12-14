@@ -10,7 +10,7 @@ use std::array;
 pub fn load_input<U, F, FS>(
     builder: &mut ConstraintSystemBuilder<U, F>,
     name: impl ToString,
-    values: Vec<u8>,
+    values: Vec<u64>,
     log_size: usize,
 ) -> Vec<usize>
 where
@@ -26,7 +26,7 @@ where
                 .witness()
                 .unwrap()
                 .new_column::<FS>(oracle)
-                .as_mut_slice::<u8>()
+                .as_mut_slice::<u64>()
                 .fill(f);
             oracle
         })

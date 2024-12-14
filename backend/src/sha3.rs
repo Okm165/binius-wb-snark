@@ -12,7 +12,7 @@ const CHUNK_SIZE: usize = 25;
 
 pub fn trace_gen<U, F, FS>(
     builder: &mut ConstraintSystemBuilder<U, F>,
-    input: Vec<u8>,
+    input: Vec<u64>,
     log_size: usize,
 ) -> Result<Vec<u64>, anyhow::Error>
 where
