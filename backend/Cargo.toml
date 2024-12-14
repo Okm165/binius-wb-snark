@@ -1,5 +1,5 @@
 [package]
-name = "binius-keccak"
+name = "binius-web-snark"
 version = "0.1.0"
 authors = ["Bartosz Nowak <bartekn337@gmail.com>"]
 edition = "2018"
@@ -11,20 +11,22 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = "0.2.84"
-serde-wasm-bindgen = "0.6.5"
-binius_circuits = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
-binius_core = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
-binius_field = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
-binius_hal = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
-binius_hash = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
-binius_math = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
-binius_utils = { git = "https://gitlab.com/IrreducibleOSS/binius.git", rev = "2b8048b5138117e345f535932253207f78ad6a6a" }
+anyhow = "1.0.81"
+binius_circuits = { path = "../../binius/crates/circuits" }
+binius_core = { path = "../../binius/crates/core" }
+binius_field = { path = "../../binius/crates/field" }
+binius_hal = { path = "../../binius/crates/hal" }
+binius_hash = { path = "../../binius/crates/hash" }
+binius_math = { path = "../../binius/crates/math" }
+binius_utils = { path = "../../binius/crates/utils" }
 bumpalo = { version = "3.16.0", features = ["collections"] }
-groestl_crypto = { package = "groestl", version = "0.10.1" }
 bytemuck = { version = "1.18.0", features = ["derive", "min_const_generics", "must_cast"] }
 getrandom = { version = "0.2.15", features = ["js"] }
+groestl_crypto = { package = "groestl", version = "0.10.1" }
+hex = "0.4.3"
 serde = "1.0.215"
+serde-wasm-bindgen = "0.6.5"
+wasm-bindgen = "0.2.84"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
