@@ -5,6 +5,7 @@ use binius_hal::make_portable_backend;
 use binius_hash::{GroestlDigestCompression, GroestlHasher};
 use binius_math::DefaultEvaluationDomainFactory;
 use groestl_crypto::Groestl256;
+use serde::{Deserialize, Serialize};
 use std::convert::TryInto;
 use utils::set_panic_hook;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
@@ -17,6 +18,13 @@ const LOG_SIZE: usize = 7;
 
 const LOG_INV_RATE: usize = 1;
 const SECURITY_BITS: usize = 100;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Output {
+    hash: String,
+    transcript: String,
+    advice: String,
+}
 
 #[wasm_bindgen]
 pub fn run_sha2(input_values: JsValue) -> Result<JsValue, JsValue> {
@@ -98,12 +106,15 @@ pub fn run_sha2(input_values: JsValue) -> Result<JsValue, JsValue> {
         SECURITY_BITS,
         &domain_factory,
         vec![],
-        proof,
+        proof.to_owned(),
     )
     .map_err(|e| JsValue::from(format!("Verification failed: {e}")))?;
 
-    serde_wasm_bindgen::to_value(&hex::encode(output))
-        .map_err(|e| JsValue::from(format!("Failed to serialize output: {e}")))
+    Ok(serde_wasm_bindgen::to_value(&Output {
+        hash: hex::encode(output),
+        transcript: hex::encode(proof.transcript),
+        advice: hex::encode(proof.advice),
+    })?)
 }
 
 #[wasm_bindgen]
@@ -186,10 +197,13 @@ pub fn run_sha3(input_values: JsValue) -> Result<JsValue, JsValue> {
         SECURITY_BITS,
         &domain_factory,
         vec![],
-        proof,
+        proof.to_owned(),
     )
     .map_err(|e| JsValue::from(format!("Verification failed: {e}")))?;
 
-    serde_wasm_bindgen::to_value(&hex::encode(output))
-        .map_err(|e| JsValue::from(format!("Failed to serialize output: {e}")))
+    Ok(serde_wasm_bindgen::to_value(&Output {
+        hash: hex::encode(output),
+        transcript: hex::encode(proof.transcript),
+        advice: hex::encode(proof.advice),
+    })?)
 }

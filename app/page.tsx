@@ -13,10 +13,12 @@ export default function Home() {
   const [isLoadingSHA3, setIsLoadingSHA3] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   const [hash, setHash] = useState<string>("");
+  const [transcript, setTranscript] = useState<string>("");
+  const [advice, setAdvice] = useState<string>("");
 
   const randomInput = () => {
     // Generate 32 random bytes
-    const randomBytes = new Uint8Array(64);
+    const randomBytes = new Uint8Array(128);
     crypto.getRandomValues(randomBytes);
 
     // Convert to a hexadecimal string
@@ -42,7 +44,9 @@ export default function Home() {
       if (error) {
         console.error(error);
       } else if (value) {
-        setHash(value);
+        setHash(value.hash);
+        setTranscript(value.transcript);
+        setAdvice(value.advice);
       }
 
       const endTime = Date.now();
@@ -76,7 +80,9 @@ export default function Home() {
       if (error) {
         console.error(error);
       } else if (value) {
-        setHash(value);
+        setHash(value.hash);
+        setTranscript(value.transcript);
+        setAdvice(value.advice);
       }
 
       const endTime = Date.now();
@@ -98,7 +104,7 @@ export default function Home() {
   return (
     <div className="grid gap-6 p-4 max-w-[800px] m-auto">
       <h1 className="text-2xl font-bold text-center text-gray-300">
-        Binius Keccak256 - Prove and Verify - SNARK demo
+        Binius hashing circuits - Prove and Verify - SNARK demo
       </h1>
       <textarea
         onChange={(e) => {
@@ -149,7 +155,7 @@ export default function Home() {
               </Box>
             )}
           </Button>
-          <div className="grid justify-center gap-1 text-xs">
+          <div className="grid justify-center gap-1 text-xs min-h-6">
             {timeSHA2 !== null ? `Time: ${timeSHA2 / 1000} seconds` : null}
           </div>
         </div>
@@ -181,16 +187,29 @@ export default function Home() {
               </Box>
             )}
           </Button>
-          <div className="grid justify-center gap-1 text-xs">
+          <div className="grid justify-center gap-1 text-xs min-h-6">
             {timeSHA3 !== null ? `Time: ${timeSHA3 / 1000} seconds` : null}
           </div>
         </div>
 
       </div>
 
+      <div>hash - {hash.length / 2} bytes</div>
       <textarea
-        className="p-0 bg-gray-900 text-sm resize-both h-32"
+        className="bg-gray-900 text-sm resize-both h-20"
         value={hash}
+        readOnly
+      />
+      <div>transcript - {transcript.length / 2} bytes</div>
+      <textarea
+        className="bg-gray-900 text-sm resize-both h-32"
+        value={transcript}
+        readOnly
+      />
+      <div>advice - {advice.length / 2} bytes</div>
+      <textarea
+        className="bg-gray-900 text-sm resize-both h-32"
+        value={advice}
         readOnly
       />
     </div>

@@ -4,8 +4,14 @@ export interface WorkerMessage {
     value: string;
 }
 
+interface Output {
+    hash: string,
+    transcript: string,
+    advice: string,
+}
+
 export interface WorkerResponse {
-    value?: string;
+    value?: Output;
     error?: string;
 }
 
