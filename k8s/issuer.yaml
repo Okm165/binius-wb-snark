@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: letsencrypt-http01
-  namespace: binius-keccak
+  namespace: binius
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory

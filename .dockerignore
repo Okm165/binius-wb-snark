@@ -39,9 +39,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-target
-**/*.rs.bk
-Cargo.lock
-bin/
-pkg/
-wasm-pack.log
+backend/target
+backend/**/*.rs.bk
+backend/Cargo.lock
+backend/bin
+backend/pkg
+backend/wasm-pack.log
